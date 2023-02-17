@@ -1,0 +1,76 @@
+-- Создание базы
+CREATE DATABASE computer_games_store;
+
+-- Создание таблиц
+CREATE TABLE customer
+(
+    id       serial PRIMARY KEY,
+    login    text NOT NULL UNIQUE,
+    password text NOT NULL UNIQUE,
+    email    text NOT NULL UNIQUE
+);
+
+CREATE TABLE publisher
+(
+    id         serial PRIMARY KEY,
+    name       text    NOT NULL UNIQUE,
+    country    text    NOT NULL,
+    found_date DATE    NOT NULL,
+    game_count INTEGER NOT NULL
+);
+
+CREATE TABLE genre
+(
+    id         serial PRIMARY KEY,
+    name       text                                                   NOT NULL UNIQUE,
+    popularity SMALLINT CHECK (popularity <= 100 and popularity >= 0) NOT NULL
+);
+
+CREATE TABLE developer
+(
+    id           serial PRIMARY KEY,
+    publisher_id BIGINT  REFERENCES publisher (id) ON DELETE SET NULL,
+    name         text    NOT NULl UNIQUE,
+    country      text    NOT NULL,
+    found_date   DATE    NOT NULL,
+    game_count   INTEGER NOT NULL
+);
+
+CREATE TABLE game
+(
+    id           serial PRIMARY KEY,
+    developer_id BIGINT REFERENCES developer (id) ON DELETE CASCADE NOT NULL,
+    publisher_id BIGINT REFERENCES publisher (id) ON DELETE CASCADE NOT NULL,
+    name         text                                               NOT NULL UNIQUE,
+    release_date DATE                                               NOT NULL,
+    price        DOUBLE PRECISION                                   NOT NULL,
+    description  text UNIQUE                                        NOT NULL
+);
+
+CREATE TABLE game_to_genre
+(
+    game_id  BIGINT REFERENCES game (id) ON DELETE CASCADE  NOT NULL,
+    genre_id BIGINT REFERENCES genre (id) ON DELETE CASCADE NOT NULL
+);
+
+CREATE TABLE purchase
+(
+    id          serial PRIMARY KEY,
+    customer_id BIGINT REFERENCES customer (id) ON DELETE CASCADE NOT NULL,
+    date        DATE                                              NOT NULL
+);
+
+CREATE TABLE purchase_to_game
+(
+    purchase_id BIGINT REFERENCES purchase (id) ON DELETE CASCADE NOT NULL,
+    game_id     BIGINT REFERENCES game (id) ON DELETE CASCADE     NOT NULL
+);
+
+CREATE TABLE review
+(
+    id          serial PRIMARY KEY,
+    customer_id BIGINT REFERENCES customer (id) ON DELETE CASCADE NOT NULL,
+    game_id     BIGINT REFERENCES game (id) ON DELETE CASCADE     NOT NULL,
+    rate        SMALLINT CHECK (rate <= 10 and rate >= 0)         NOT NULL,
+    review_text text                                              NOT NULL
+);
